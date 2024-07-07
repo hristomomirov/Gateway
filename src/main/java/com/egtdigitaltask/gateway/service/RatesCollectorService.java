@@ -10,6 +10,7 @@ import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +25,12 @@ public class RatesCollectorService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(RatesCollectorService.class);
     private static final String DEFAULT_BASE_CURRENCY = "EUR";
-    private final FixerWebClient webClient;
+    private final FixerRestClientService webClient;
     private final CurrenciesRepository currenciesRepository;
     private final ExchangeRateRepository exchangeRateRepository;
 
     @Autowired
-    public RatesCollectorService(FixerWebClient webClient,
+    public RatesCollectorService(FixerRestClientService webClient,
                                  CurrenciesRepository currenciesRepository,
                                  ExchangeRateRepository exchangeRateRepository)
     {
@@ -60,7 +61,8 @@ public class RatesCollectorService
     }
 
     // due to subscription limitations only EUR can be used as base currency
-//    @Scheduled(initialDelay = 0, fixedRateString = "${constants.scheduling.fixedRate}")
+    @CacheEvict(value = "currentExchangeRateCache", allEntries = true)
+    @Scheduled(initialDelay = 0, fixedRateString = "${constants.scheduling.fixedRate}")
     @Transactional
     public void insertExchangeRates()
     {

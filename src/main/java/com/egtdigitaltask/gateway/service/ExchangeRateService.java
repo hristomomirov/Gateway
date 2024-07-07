@@ -7,11 +7,9 @@ import com.egtdigitaltask.gateway.model.dto.ExchangeRateHistory;
 import com.egtdigitaltask.gateway.model.dto.ExchangeRateHistoryResponse;
 import com.egtdigitaltask.gateway.repository.ExchangeRateRepository;
 import com.egtdigitaltask.gateway.repository.RequestRepository;
-import com.egtdigitaltask.gateway.utill.Validator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,45 +46,31 @@ public class ExchangeRateService
                                                               long period,
                                                               long timestamp)
     {
-        //validate if request with this id does not exist
-        LOGGER.info("Validating request with requestId=" + requestId);
-        Optional<RequestData> optionalRequestData = requestRepository.findByRequestId(requestId);
-        Validator.validateUniqueRequestId(optionalRequestData);
-
-        //create request entity
         RequestData requestData = new RequestData(serviceName, requestId, timestamp, client);
-
-        List<ExchangeRate> exchangeRates = insertRequestAndGetExchangeRates(requestData, currency, period);
+        List<ExchangeRate> exchangeRates = insertRequestAndGetExchangeRatesHistory(requestData, currency, period);
 
         rabbitMqProducer.sendMessage(requestData);
 
         if (exchangeRates.isEmpty())
         {
             LOGGER.warn("Could not retrieve current exchange rates for request with requestId=" + requestId
-                                                                            + " and baseCurrency= " + currency);
+                                                                                + " and baseCurrency= " + currency);
             return new ExchangeRateHistoryResponse(currency, null);
         }
         return new ExchangeRateHistoryResponse(currency, generateExchangeRateHistory(exchangeRates));
     }
 
-    @Cacheable // redis
     public CurrentExchangeRateResponse getCurrentExchangeRate(String serviceName,
                                                               String requestId,
                                                               String client,
                                                               String currency,
                                                               long timestamp)
     {
-        //validate if request with this id does not exist
-        LOGGER.info("Validating request with requestId=" + requestId);
-        Optional<RequestData> optionalRequestData = requestRepository.findByRequestId(requestId);
-        Validator.validateUniqueRequestId(optionalRequestData);
-
-        //create request entity
+        validateUniqueRequestId(requestId);
         RequestData requestData = new RequestData(serviceName, requestId, timestamp, client);
 
         //to get the latest exchange rates we query for the rates inserted in the last hour
-        long oneHourPeriod = 60 * 60;
-        List<ExchangeRate> exchangeRates = insertRequestAndGetExchangeRates(requestData, currency, oneHourPeriod);
+        List<ExchangeRate> exchangeRates = insertRequestAndGetLatestExchangeRates(requestData, currency);
 
         rabbitMqProducer.sendMessage(requestData);
         LOGGER.info("Message sent to queue");
@@ -94,23 +78,28 @@ public class ExchangeRateService
         if (exchangeRates.isEmpty())
         {
             LOGGER.warn("Could not retrieve current exchange rates for request with requestId=" + requestId
-                        + " and baseCurrency= " + currency);
+                                                                                + " and baseCurrency= " + currency);
             return new CurrentExchangeRateResponse(currency, 0, null);
         }
+        return generateCurrentExchangeRate(exchangeRates, currency);
+    }
 
+    private static CurrentExchangeRateResponse generateCurrentExchangeRate(List<ExchangeRate> exchangeRates,
+                                                                           String currency)
+    {
         TreeMap<String, Double> tickerToRate = exchangeRates.stream()
-                                                        .collect(Collectors.toMap(er -> er.getTarget().getTicker(),
-                                                                                  ExchangeRate::getRate,
-                                                                                  (a, b) -> a,
-                                                                                  TreeMap::new));
+                                                            .collect(Collectors.toMap(er -> er.getTarget().getTicker(),
+                                                                                      ExchangeRate::getRate,
+                                                                                      (a, b) -> a,
+                                                                                      TreeMap::new));
+
         long currentRatesTimestamp = exchangeRates.get(0).getTimestamp();
         return new CurrentExchangeRateResponse(currency, currentRatesTimestamp, tickerToRate);
     }
 
     @Transactional
-    private List<ExchangeRate> insertRequestAndGetExchangeRates(RequestData requestData, String currency, long period)
+    public List<ExchangeRate> insertRequestAndGetExchangeRatesHistory(RequestData requestData, String currency, long period)
     {
-        //insert request in DB and get history in transaction
         requestRepository.save(requestData);
         //we try to get the exchange rate per base currency between now and a point in history in UTC time
         //seconds * minutes * hours
@@ -120,8 +109,14 @@ public class ExchangeRateService
                                                                                                 endTime,
                                                                                                 currency);
     }
+    @Transactional
+    public List<ExchangeRate> insertRequestAndGetLatestExchangeRates(RequestData requestData, String currency)
+    {
+        requestRepository.save(requestData);
+        return exchangeRateRepository.findRecentRates(currency);
+    }
 
-    private List<ExchangeRateHistory> generateExchangeRateHistory(List<ExchangeRate> exchangeRates)
+    private static List<ExchangeRateHistory> generateExchangeRateHistory(List<ExchangeRate> exchangeRates)
     {
         TreeMap<Long, Map<String, Double>> timestampToTickerToRate = new TreeMap<>();
         for (ExchangeRate rate : exchangeRates)
@@ -138,5 +133,18 @@ public class ExchangeRateService
                                       .map(e -> new ExchangeRateHistory(e.getKey(),
                                                                         e.getValue()))
                                       .toList();
+    }
+
+    public void validateUniqueRequestId(String requestId)
+    {
+        //validate if request with this id does not exist
+        LOGGER.info("Validating request with requestId=" + requestId);
+        Optional<RequestData> optionalRequestData = requestRepository.findByRequestId(requestId);
+
+        if (optionalRequestData.isPresent())
+        {
+            LOGGER.error("Request with that id already exists");
+            throw new IllegalArgumentException("Request with that id already exists");
+        }
     }
 }

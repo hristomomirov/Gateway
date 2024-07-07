@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 @Service
-public class FixerWebClient
+public class FixerRestClientService
 {
     @Value("${constants.fixerIo.accessKey}")
     private String fixerAccessKey;
@@ -16,7 +16,7 @@ public class FixerWebClient
     private final RestClient restClient;
 
     @Autowired
-    public FixerWebClient(RestClient restClient)
+    public FixerRestClientService(RestClient restClient)
     {
         this.restClient = restClient;
     }
