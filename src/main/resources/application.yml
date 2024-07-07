@@ -20,10 +20,18 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 
-#todo make constants.scheduling and constants. fixerIO
-scheduling:
+constants:
+  scheduling:
     fixedRate: 3600000 # 1 hour in milliseconds
-
-fixerIo:
-  accessKey: b1b53fb06f300fa95a8a1feeb98506f2
+  fixerIo:
+    accessKey: b1b53fb06f300fa95a8a1feeb98506f2
+  rabbitmq:
+    queue: requests_queue
+    exchange: requests_exchange
+    routingKey: requests_routing_key

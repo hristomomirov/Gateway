@@ -24,15 +24,19 @@ public class ExchangeRateService
 
     private final RequestRepository requestRepository;
 
+    private final RabbitMqProducer rabbitMqProducer;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ExchangeRateService.class);
 
 
     @Autowired
     public ExchangeRateService(ExchangeRateRepository exchangeRateRepository,
-                               RequestRepository requestRepository)
+                               RequestRepository requestRepository,
+                               RabbitMqProducer rabbitMqProducer)
     {
         this.exchangeRateRepository = exchangeRateRepository;
         this.requestRepository = requestRepository;
+        this.rabbitMqProducer = rabbitMqProducer;
     }
 
     public ExchangeRateHistoryResponse getExchangeRateHistory(String serviceName,
@@ -44,6 +48,8 @@ public class ExchangeRateService
     {
         RequestData requestData = new RequestData(serviceName, requestId, timestamp, client);
         List<ExchangeRate> exchangeRates = insertRequestAndGetExchangeRatesHistory(requestData, currency, period);
+
+        rabbitMqProducer.sendMessage(requestData);
 
         if (exchangeRates.isEmpty())
         {
@@ -65,6 +71,9 @@ public class ExchangeRateService
 
         //to get the latest exchange rates we query for the rates inserted in the last hour
         List<ExchangeRate> exchangeRates = insertRequestAndGetLatestExchangeRates(requestData, currency);
+
+        rabbitMqProducer.sendMessage(requestData);
+        LOGGER.info("Message sent to queue");
 
         if (exchangeRates.isEmpty())
         {
