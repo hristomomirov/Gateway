@@ -60,7 +60,7 @@ public class RatesCollectorService
     }
 
     // due to subscription limitations only EUR can be used as base currency
-    @Scheduled(initialDelay = 0, fixedRateString = "${scheduling.fixedRate}")
+//    @Scheduled(initialDelay = 0, fixedRateString = "${constants.scheduling.fixedRate}")
     @Transactional
     public void insertExchangeRates()
     {

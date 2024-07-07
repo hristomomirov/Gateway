@@ -2,10 +2,12 @@ package com.egtdigitaltask.gateway.model;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+
 @Entity
 @Table(name = "requests",
        uniqueConstraints = @UniqueConstraint(columnNames = "request_id"))
-public class RequestData
+public class RequestData implements Serializable
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

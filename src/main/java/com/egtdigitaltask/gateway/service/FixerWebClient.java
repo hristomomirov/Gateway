@@ -10,7 +10,7 @@ import org.springframework.web.client.RestClient;
 @Service
 public class FixerWebClient
 {
-    @Value("${fixerIo.accessKey}")
+    @Value("${constants.fixerIo.accessKey}")
     private String fixerAccessKey;
 
     private final RestClient restClient;
