@@ -1,11 +1,25 @@
 package com.egtdigitaltask.gateway.model.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+
 public class ExchangeRateHistoryRequest
 {
+    @NotBlank(message = "Request id must not be null or empty")
     private String requestId;
+
+    @Positive(message = "Timestamp must be a positive number")
     private long timestamp;
+
+    @NotBlank(message = "Client must not be null or empty")
     private String client;
+
+    @NotBlank(message = "Currency must not be null or empty")
+    @Size(min = 3, max = 3, message = "Currency ticker not valid")
     private String currency;
+
+    @Positive(message = "Period must be a positive number")
     private long period;
 
     public ExchangeRateHistoryRequest() {}

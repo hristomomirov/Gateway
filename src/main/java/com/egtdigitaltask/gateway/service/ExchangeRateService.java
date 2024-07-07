@@ -46,6 +46,7 @@ public class ExchangeRateService
                                                               long period,
                                                               long timestamp)
     {
+        validateUniqueRequestId(requestId);
         RequestData requestData = new RequestData(serviceName, requestId, timestamp, client);
         List<ExchangeRate> exchangeRates = insertRequestAndGetExchangeRatesHistory(requestData, currency, period);
 

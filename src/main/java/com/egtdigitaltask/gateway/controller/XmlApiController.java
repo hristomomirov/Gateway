@@ -2,6 +2,7 @@ package com.egtdigitaltask.gateway.controller;
 
 import com.egtdigitaltask.gateway.model.dto.*;
 import com.egtdigitaltask.gateway.service.ExchangeRateService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class XmlApiController
     }
 
     @PostMapping(path = "/command", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<ExchangeRateResponse> getExchangeRateHistory(@RequestBody CommandRequest request)
+    public ResponseEntity<ExchangeRateResponse> getExchangeRateHistory(@Valid @RequestBody CommandRequest request)
     {
         if (request == null)
         {

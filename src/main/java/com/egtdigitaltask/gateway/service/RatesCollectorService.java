@@ -62,7 +62,7 @@ public class RatesCollectorService
 
     // due to subscription limitations only EUR can be used as base currency
     @CacheEvict(value = "currentExchangeRateCache", allEntries = true)
-    @Scheduled(initialDelay = 0, fixedRateString = "${constants.scheduling.fixedRate}")
+//    @Scheduled(initialDelay = 0, fixedRateString = "${constants.scheduling.fixedRate}")
     @Transactional
     public void insertExchangeRates()
     {

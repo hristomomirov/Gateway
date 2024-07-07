@@ -5,6 +5,7 @@ import com.egtdigitaltask.gateway.model.dto.ExchangeRateHistoryResponse;
 import com.egtdigitaltask.gateway.model.dto.ExchangeRateHistoryRequest;
 import com.egtdigitaltask.gateway.model.dto.CurrentExchangeRateResponse;
 import com.egtdigitaltask.gateway.service.ExchangeRateService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,19 +30,18 @@ public class JsonApiController
     }
 
     @PostMapping(path = "/current", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CurrentExchangeRateResponse> getCurrentExchangeRate(@RequestBody CurrentExchangeRateRequest body)
+    public ResponseEntity<CurrentExchangeRateResponse> getCurrentExchangeRate(@Valid @RequestBody CurrentExchangeRateRequest body)
     {
         CurrentExchangeRateResponse response = exchangeRateService.getCurrentExchangeRate(JSON_API_EXT_SERVICE_NAME,
                                                                                           body.getRequestId(),
                                                                                           body.getClient(),
                                                                                           body.getCurrency(),
                                                                                           body.getTimestamp());
-        //todo send to rabbit
         return ResponseEntity.ok().body(response);
     }
 
     @PostMapping(path = "/history", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ExchangeRateHistoryResponse> getExchangeRateHistory(@RequestBody ExchangeRateHistoryRequest body)
+    public ResponseEntity<ExchangeRateHistoryResponse> getExchangeRateHistory(@Valid @RequestBody ExchangeRateHistoryRequest body)
     {
         exchangeRateService.validateUniqueRequestId(body.getRequestId());
 
@@ -51,7 +51,6 @@ public class JsonApiController
                                                                                           body.getCurrency(),
                                                                                           body.getPeriod(),
                                                                                           body.getTimestamp());
-        // todo send to rabbit
         return ResponseEntity.ok().body(response);
     }
 
