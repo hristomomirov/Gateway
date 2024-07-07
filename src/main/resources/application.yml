@@ -1,4 +1,11 @@
 spring:
+  data:
+    redis:
+      database: 0
+      host: localhost
+      port: 6379
+      password: mypass
+      timeout: 60000
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/egtdigital?createDatabaseIfNotExist=true
@@ -14,6 +21,7 @@ spring:
       ddl-auto: update
     show-sql: true
 
+#todo make constants.scheduling and constants. fixerIO
 scheduling:
     fixedRate: 3600000 # 1 hour in milliseconds
 

@@ -24,12 +24,12 @@ public class RatesCollectorService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(RatesCollectorService.class);
     private static final String DEFAULT_BASE_CURRENCY = "EUR";
-    private final FixerWebClient webClient;
+    private final FixerRestClientService webClient;
     private final CurrenciesRepository currenciesRepository;
     private final ExchangeRateRepository exchangeRateRepository;
 
     @Autowired
-    public RatesCollectorService(FixerWebClient webClient,
+    public RatesCollectorService(FixerRestClientService webClient,
                                  CurrenciesRepository currenciesRepository,
                                  ExchangeRateRepository exchangeRateRepository)
     {
@@ -60,7 +60,8 @@ public class RatesCollectorService
     }
 
     // due to subscription limitations only EUR can be used as base currency
-    @Scheduled(initialDelay = 0, fixedRateString = "${scheduling.fixedRate}")
+//    @Scheduled(initialDelay = 0, fixedRateString = "${scheduling.fixedRate}")
+    // todo return
     @Transactional
     public void insertExchangeRates()
     {

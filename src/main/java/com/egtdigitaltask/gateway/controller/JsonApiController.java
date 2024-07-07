@@ -36,21 +36,24 @@ public class JsonApiController
                                                                                           body.getClient(),
                                                                                           body.getCurrency(),
                                                                                           body.getTimestamp());
-        //send to rabbit
+        //todo send to rabbit
         return ResponseEntity.ok().body(response);
     }
 
     @PostMapping(path = "/history", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ExchangeRateHistoryResponse> getExchangeRateHistory(@RequestBody ExchangeRateHistoryRequest body)
     {
+        exchangeRateService.validateUniqueRequestId(body.getRequestId());
+
         ExchangeRateHistoryResponse response = exchangeRateService.getExchangeRateHistory(JSON_API_EXT_SERVICE_NAME,
                                                                                           body.getRequestId(),
                                                                                           body.getClient(),
                                                                                           body.getCurrency(),
                                                                                           body.getPeriod(),
                                                                                           body.getTimestamp());
-        // send to rabbit
+        // todo send to rabbit
         return ResponseEntity.ok().body(response);
     }
+
 }
 
