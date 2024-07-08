@@ -109,27 +109,8 @@ public class ExchangeRateServiceTests extends BaseTestContainers
                                                                                           "test",
                                                                                           "EUR",
                                                                                           timestamp);
-
-        Optional<RequestData> data = requestRepository.findByRequestId(requestId);
-        Assertions.assertTrue(data.isPresent());
-
-        RequestData expectedRequestData = new RequestData("TEST_SERVICE", requestId, timestamp, "test");
-        expectedRequestData.setId(data.get().getId());
-        Mockito.verify(producer).sendMessage(requestDataCaptor.capture());
-        RequestData actualRequestData = requestDataCaptor.getValue();
-        Assertions.assertEquals(expectedRequestData, actualRequestData);
-
-
-        // assert that data returned is correct
-        Assertions.assertNotNull(response);
-        Map<String, Double> actualExchangeRates = response.getExchangeRates();
-        Assertions.assertNotNull(actualExchangeRates);
-        Assertions.assertEquals(EXPECTED_EXCHANGE_RATES.size(), actualExchangeRates.size());
-        for (Map.Entry<String, Double> entry : EXPECTED_EXCHANGE_RATES.entrySet())
-        {
-            Assertions.assertTrue(actualExchangeRates.containsKey(entry.getKey()));
-            Assertions.assertEquals(entry.getValue(), actualExchangeRates.get(entry.getKey()));
-        }
+        validateRequestData(requestId,timestamp);
+        validateCurrentExchangeRateResponse(response);
     }
 
     @Test
@@ -166,14 +147,37 @@ public class ExchangeRateServiceTests extends BaseTestContainers
                                                                                           "EUR",
                                                                                           4, timestamp);
 
-        Assertions.assertTrue(requestRepository.findByRequestId(requestId).isPresent());
+        validateRequestData(requestId, timestamp);
+        validateExchangeRateHistoryResponse(response);
+    }
+
+    private void validateRequestData(String requestId, long timestamp)
+    {
+        Optional<RequestData> data = requestRepository.findByRequestId(requestId);
+        Assertions.assertTrue(data.isPresent());
 
         RequestData expectedRequestData = new RequestData("TEST_SERVICE", requestId, timestamp, "test");
-        expectedRequestData.setId(1);
+        expectedRequestData.setId(data.get().getId());
         Mockito.verify(producer).sendMessage(requestDataCaptor.capture());
         RequestData actualRequestData = requestDataCaptor.getValue();
         Assertions.assertEquals(expectedRequestData, actualRequestData);
+    }
 
+    private void validateCurrentExchangeRateResponse(CurrentExchangeRateResponse response)
+    {
+        Assertions.assertNotNull(response);
+        Map<String, Double> actualExchangeRates = response.getExchangeRates();
+        Assertions.assertNotNull(actualExchangeRates);
+        Assertions.assertEquals(EXPECTED_EXCHANGE_RATES.size(), actualExchangeRates.size());
+        for (Map.Entry<String, Double> entry : EXPECTED_EXCHANGE_RATES.entrySet())
+        {
+            Assertions.assertTrue(actualExchangeRates.containsKey(entry.getKey()));
+            Assertions.assertEquals(entry.getValue(), actualExchangeRates.get(entry.getKey()));
+        }
+    }
+
+    private void validateExchangeRateHistoryResponse(ExchangeRateHistoryResponse response)
+    {
         Assertions.assertNotNull(response);
         List<ExchangeRateHistory> actualExchangeRateHistories = response.getHistories();
         Assertions.assertNotNull(actualExchangeRateHistories);
