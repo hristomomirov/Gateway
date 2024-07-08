@@ -43,8 +43,6 @@ public class JsonApiController
     @PostMapping(path = "/history", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ExchangeRateHistoryResponse> getExchangeRateHistory(@Valid @RequestBody ExchangeRateHistoryRequest body)
     {
-        exchangeRateService.validateUniqueRequestId(body.getRequestId());
-
         ExchangeRateHistoryResponse response = exchangeRateService.getExchangeRateHistory(JSON_API_EXT_SERVICE_NAME,
                                                                                           body.getRequestId(),
                                                                                           body.getClient(),

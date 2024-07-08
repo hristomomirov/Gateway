@@ -1,6 +1,7 @@
 package com.egtdigitaltask.gateway.model.dto;
 
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 
 public class CommandRequest
@@ -8,8 +9,10 @@ public class CommandRequest
     @NotBlank(message = "Id must not be null or empty")
     private String id;
 
+    @Valid
     private Get get;
 
+    @Valid
     private History history;
 
 

@@ -9,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,14 @@ public class ExceptionAdviceHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(value = IllegalArgumentException.class)
     public ResponseEntity<Object> exceptionIllegalArgument(IllegalArgumentException exception)
+    {
+        LOGGER.error(exception.getMessage(), exception);
+        return ResponseEntity.badRequest().body(exception.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = RestClientResponseException.class)
+    public ResponseEntity<Object> exceptionRestClientResponse(RestClientResponseException exception)
     {
         LOGGER.error(exception.getMessage(), exception);
         return ResponseEntity.badRequest().body(exception.getMessage());

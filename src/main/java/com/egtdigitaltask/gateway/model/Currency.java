@@ -6,11 +6,11 @@ import jakarta.persistence.*;
 @Table(name = "currencies")
 public class Currency
 {
-    @Column(name = "ticker")
     @Id
+    @Column(name = "ticker", nullable = false, length = 3)
     private String ticker;
 
-    @Column(name = "full_name")
+    @Column(name = "full_name", nullable = false)
     private String fullName;
 
     public Currency() {}

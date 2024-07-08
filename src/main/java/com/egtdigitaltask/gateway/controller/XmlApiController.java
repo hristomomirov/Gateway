@@ -30,13 +30,13 @@ public class XmlApiController
     @PostMapping(path = "/command", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<ExchangeRateResponse> getExchangeRateHistory(@Valid @RequestBody CommandRequest request)
     {
-        if (request == null)
-        {
-            return ResponseEntity.ok().build();
-        }
-
         long timestamp = Instant.now().getEpochSecond();
-        if (request.getGet() != null)
+        if (request.getGet() != null && request.getHistory() != null)
+        {
+            LOGGER.error("Cannot process get current and get history with single request. requestId=" + request.getId());
+            throw new IllegalArgumentException("Cannot process get current and get history with single request");
+        }
+        else if (request.getGet() != null)
         {
             Get get = request.getGet();
             CurrentExchangeRateResponse response = exchangeRateService.getCurrentExchangeRate(XML_API_EXT_SERVICE_NAME,
@@ -59,8 +59,7 @@ public class XmlApiController
         }
         else
         {
-            LOGGER.error("Cannot process get current and get history with single request. requestId=" + request.getId());
-            throw new IllegalArgumentException("Cannot process get current and get history with single request");
-        }
+            LOGGER.error("Cannot process request without type. requestId=" + request.getId());
+            throw new IllegalArgumentException("Cannot process request without type.");        }
     }
 }

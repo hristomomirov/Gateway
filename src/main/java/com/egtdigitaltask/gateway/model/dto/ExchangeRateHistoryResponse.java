@@ -4,23 +4,23 @@ import java.util.List;
 
 public class ExchangeRateHistoryResponse extends ExchangeRateResponse
 {
-    private List<ExchangeRateHistory> history;
+    private List<ExchangeRateHistory> histories;
 
     public ExchangeRateHistoryResponse() {}
 
     public ExchangeRateHistoryResponse(String base, List<ExchangeRateHistory> history)
     {
         super(base);
-        this.history = history;
+        this.histories = history;
     }
 
-    public List<ExchangeRateHistory> getHistory()
+    public List<ExchangeRateHistory> getHistories()
     {
-        return history;
+        return histories;
     }
 
-    public void setHistory(List<ExchangeRateHistory> history)
+    public void setHistories(List<ExchangeRateHistory> histories)
     {
-        this.history = history;
+        this.histories = histories;
     }
 }

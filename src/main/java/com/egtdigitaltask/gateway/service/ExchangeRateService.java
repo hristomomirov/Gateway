@@ -136,7 +136,7 @@ public class ExchangeRateService
                                       .toList();
     }
 
-    public void validateUniqueRequestId(String requestId)
+    private void validateUniqueRequestId(String requestId)
     {
         //validate if request with this id does not exist
         LOGGER.info("Validating request with requestId=" + requestId);

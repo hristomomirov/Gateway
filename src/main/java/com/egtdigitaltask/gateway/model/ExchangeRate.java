@@ -3,7 +3,9 @@ package com.egtdigitaltask.gateway.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "exchange_rates")
+@Table(name = "exchange_rates",
+       uniqueConstraints = @UniqueConstraint(name = "exchange_rates_uc_base_ticker_target_ticker_timestamp",
+                                             columnNames = {"base_ticker", "target_ticker", "timestamp"}))
 public class ExchangeRate
 {
     @Id
@@ -11,17 +13,17 @@ public class ExchangeRate
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "base_ticker", referencedColumnName = "ticker")
+    @JoinColumn(name = "base_ticker", referencedColumnName = "ticker", nullable = false)
     private Currency base;
 
     @ManyToOne
-    @JoinColumn(name = "target_ticker", referencedColumnName = "ticker")
+    @JoinColumn(name = "target_ticker", referencedColumnName = "ticker", nullable = false)
     private Currency target;
 
-    @Column(name = "timestamp")
+    @Column(name = "timestamp", nullable = false)
     private long timestamp;
 
-    @Column(name = "rate")
+    @Column(name = "rate", nullable = false)
     private double rate;
 
     public ExchangeRate()
